@@ -219,6 +219,10 @@
 
 <script>
 // ── CONFIG ─────────────────────────────────────────────────
+
+const SB_URL = "https://fbdkneqzjfjsdffzcsvy.supabase.co";
+const SB_KEY = "sb_publishable_e5kv2Iuv6IHD0VziMkb42w_u6_CcyXm";
+  
 const STAFF = [
   {id:'osmani', name:'Osmani', pt:false, bg:'#EEEDFE', fg:'#3C3489', initials:'OS'},
   {id:'shawna', name:'Shawna', pt:false, bg:'#E1F5EE', fg:'#085041', initials:'SW'},
@@ -594,17 +598,8 @@ window.addEventListener('offline', () => document.getElementById('offlineBanner'
 
 // ── INIT ───────────────────────────────────────────────────
 (async function init() {
-  const sbUrl = localStorage.getItem('sb_url');
-  const sbKey = localStorage.getItem('sb_key');
-  const skip  = localStorage.getItem('sb_skip');
-
-  if (sbUrl && sbKey) {
-    try { await initSupabase(sbUrl, sbKey); } catch(e) { console.warn('Supabase init failed', e); }
-    goLogin();
-  } else if (skip) {
-    goLogin();
-  }
-  // else stays on setup screen
+  try { await initSupabase(SB_URL, SB_KEY); } catch(e) { console.warn(e); }
+  goLogin();
 })();
 </script>
 </body>

@@ -209,41 +209,24 @@ async function dbGet(date) {
 
 async function dbSet(date, choreId, done) {
   try {
-    // Try PATCH first (update existing row)
-    const patchRes = await fetch(
-      `${SB_URL}/rest/v1/chore_checks?date=eq.${date}&chore_id=eq.${choreId}`,
+    const res = await fetch(
+      `${SB_URL}/rest/v1/chore_checks?on_conflict=date,chore_id`,
       {
-        method: 'PATCH',
+        method: 'POST',
         headers: {
           'apikey': SB_KEY,
           'Authorization': 'Bearer ' + SB_KEY,
           'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
+          'Prefer': 'resolution=merge-duplicates,return=minimal'
         },
-        body: JSON.stringify({ done })
+        body: JSON.stringify({ date, chore_id: choreId, done })
       }
     );
-    if (patchRes.ok) {
-      // Check if any row was actually updated
-      const count = patchRes.headers.get('content-range');
-      if (count && count !== '*/0') return true;
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('dbSet error:', res.status, txt);
     }
-    // No existing row — INSERT new one
-    const postRes = await fetch(`${SB_URL}/rest/v1/chore_checks`, {
-      method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ date, chore_id: choreId, done })
-    });
-    if (!postRes.ok) {
-      const txt = await postRes.text();
-      console.error('dbSet error:', postRes.status, txt);
-    }
-    return postRes.ok;
+    return res.ok;
   } catch(e) { console.error('dbSet fetch error:', e); return false; }
 }
 

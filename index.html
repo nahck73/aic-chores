@@ -6,72 +6,46 @@
 <title>AIC Chore Tracker</title>
 <style>
   :root {
-    --green: #1D9E75;
-    --green-light: #E1F5EE;
-    --green-dark: #0F6E56;
-    --amber-light: #FAEEDA;
-    --amber-dark: #854F0B;
-    --bg: #f5f5f3;
-    --card: #ffffff;
-    --border: rgba(0,0,0,0.1);
-    --text: #1a1a18;
-    --muted: #6b6b68;
-    --hint: #9a9a97;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+    --amber-light:#FAEEDA;--amber-dark:#854F0B;
+    --bg:#f5f5f3;--card:#ffffff;--border:rgba(0,0,0,0.1);
+    --text:#1a1a18;--muted:#6b6b68;--hint:#9a9a97;
+    --radius:12px;--radius-sm:8px;
   }
   @media(prefers-color-scheme:dark){
-    :root{
-      --bg:#1c1c1a;--card:#2a2a28;--border:rgba(255,255,255,0.1);
-      --text:#f0f0ee;--muted:#a0a09d;--hint:#6a6a68;
-    }
+    :root{--bg:#1c1c1a;--card:#2a2a28;--border:rgba(255,255,255,0.1);--text:#f0f0ee;--muted:#a0a09d;--hint:#6a6a68;}
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
   .app{max-width:440px;margin:0 auto;padding:0 0 80px}
-
-  /* SCREENS */
   .screen{display:none;padding:1rem}
   .screen.active{display:block}
-
-  /* TOPBAR */
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1rem 0}
   .topbar-title{font-size:17px;font-weight:600;color:var(--text)}
   .topbar-sub{font-size:12px;color:var(--muted);margin-top:1px}
   .topbar-right{display:flex;align-items:center;gap:8px}
   .icon-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:4px}
-  .icon-btn:active{opacity:0.7}
-
-  /* AVATAR */
   .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
   .avatar-lg{width:56px;height:56px;font-size:18px}
-
-  /* LOGIN */
   .login-wrap{padding:1.5rem 1rem}
   .login-logo{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
   .login-sub{font-size:14px;color:var(--muted);margin-bottom:1.5rem}
   .staff-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-  .staff-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center;cursor:pointer;transition:transform 0.1s;-webkit-tap-highlight-color:transparent}
+  .staff-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center;cursor:pointer;transition:transform 0.1s}
   .staff-btn:active{transform:scale(0.97)}
   .staff-btn.unavail{opacity:0.35;pointer-events:none}
   .staff-btn-name{font-size:14px;font-weight:600;color:var(--text);margin-top:8px}
   .staff-btn-sub{font-size:11px;color:var(--muted);margin-top:2px}
   .admin-btn{width:100%;background:none;border:1px dashed var(--border);border-radius:var(--radius-sm);padding:11px;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px}
-  .admin-btn:active{opacity:0.7}
-
-  /* PROGRESS */
   .prog-bar-wrap{background:var(--border);border-radius:99px;height:5px;margin-bottom:4px;overflow:hidden}
   .prog-bar{height:5px;border-radius:99px;background:var(--green);transition:width 0.4s ease}
   .prog-label{font-size:12px;color:var(--muted)}
-
-  /* SECTION */
   .section-hdr{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:0.07em;margin:1.25rem 0 6px}
-
-  /* CHORE CARD */
   .chore-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.1s}
   .chore-card:active{background:var(--bg)}
   .chore-card.done{opacity:0.5}
   .chore-card.done .chore-label{text-decoration:line-through;color:var(--hint)}
+  .chore-card.readonly{cursor:default}
   .chk{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,border-color 0.15s}
   .chk.on{background:var(--green);border-color:var(--green)}
   .chk svg{display:none;width:13px;height:13px;stroke:white;stroke-width:2.5;fill:none}
@@ -80,14 +54,10 @@
   .pill{font-size:11px;padding:3px 8px;border-radius:99px;flex-shrink:0;font-weight:500}
   .pill-daily{background:var(--green-light);color:var(--green-dark)}
   .pill-weekly{background:var(--amber-light);color:var(--amber-dark)}
-
-  /* STAT CARDS */
   .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem}
   .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
   .stat-val{font-size:24px;font-weight:700;color:var(--text)}
   .stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
-
-  /* STAFF ROW */
   .staff-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
   .sr-info{flex:1}
   .sr-name{font-size:14px;font-weight:600;color:var(--text)}
@@ -96,133 +66,86 @@
   .sr-pct{font-size:14px;font-weight:600;color:var(--text)}
   .sr-bar-wrap{width:48px;background:var(--border);border-radius:99px;height:3px;margin-top:3px;overflow:hidden}
   .sr-bar{height:3px;border-radius:99px;background:var(--green)}
-
-  /* DATE NAV */
   .date-nav{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
-  .date-nav-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .date-nav-btn:active{opacity:0.7}
+  .date-nav-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:var(--text)}
   .date-nav-label{flex:1;text-align:center;font-size:14px;font-weight:500;color:var(--text)}
-
-  /* TOAST */
+  .rotate-btn{width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:6px}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--card);font-size:13px;padding:9px 18px;border-radius:99px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:100;white-space:nowrap}
   .toast.show{opacity:1}
-
-  /* OFFLINE BANNER */
-  .offline-banner{background:#FAEEDA;color:#854F0B;font-size:12px;text-align:center;padding:6px;display:none}
-  .offline-banner.show{display:block}
-
-  /* SETUP SCREEN */
-  .setup-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
-  .setup-title{font-size:16px;font-weight:600;margin-bottom:8px}
-  .setup-input{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:14px;background:var(--bg);color:var(--text);margin-bottom:8px}
-  .setup-input:focus{outline:2px solid var(--green);outline-offset:1px}
-  .setup-btn{width:100%;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);padding:11px;font-size:14px;font-weight:600;cursor:pointer}
-  .setup-btn:active{opacity:0.85}
-  .setup-note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
-  code{background:var(--bg);padding:1px 5px;border-radius:4px;font-size:11px;border:1px solid var(--border)}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-left:6px}
+  .sync-dot.syncing{background:#EF9F27;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 </style>
 </head>
 <body>
+<div class="app">
+  <!-- LOGIN -->
+  <div class="screen active" id="screenLogin">
+    <div class="login-wrap">
+      <div class="login-logo">Advanced Implant Centers</div>
+      <div class="login-sub" id="loginDate"></div>
+      <div class="staff-grid" id="staffGrid"></div>
+      <button class="admin-btn" onclick="loginAs('admin')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin / Dr. Brian
+      </button>
+    </div>
+  </div>
 
-<div class="offline-banner" id="offlineBanner">⚠ Offline — changes saved locally and will sync when reconnected</div>
-
-<!-- SETUP SCREEN -->
-<div class="screen active" id="screenSetup">
-  <div style="padding:1.5rem 1rem">
-    <div style="font-size:22px;font-weight:700;margin-bottom:4px">AIC Chore Tracker</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:1.5rem">First-time setup</div>
-    <div class="setup-card">
-      <div class="setup-title">Connect to Supabase</div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.5">Enter your Supabase project URL and anon key to enable real-time sync across all devices.</p>
-      <input class="setup-input" id="sbUrl" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="none">
-      <input class="setup-input" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off" autocapitalize="none">
-      <button class="setup-btn" onclick="saveSupabaseConfig()">Save & continue</button>
-      <div class="setup-note">
-        1. Go to <strong>supabase.com</strong> → New project (free)<br>
-        2. Settings → API → copy <strong>Project URL</strong> and <strong>anon public</strong> key<br>
-        3. Run the SQL in <code>supabase-setup.sql</code> in the SQL editor<br>
-        4. Paste both values above
+  <!-- STAFF -->
+  <div class="screen" id="screenStaff">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="staffName"></div>
+        <div class="topbar-sub" id="staffDate"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar" id="staffAvatar"></div>
+        <button class="icon-btn" onclick="logout()">Sign out</button>
       </div>
     </div>
-    <div style="margin-top:10px">
-      <button class="admin-btn" onclick="skipSetup()">Skip — use local storage only (single device)</button>
+    <div style="padding:1rem 1rem 0">
+      <div class="prog-bar-wrap"><div class="prog-bar" id="staffProg" style="width:0%"></div></div>
+      <div class="prog-label" id="staffProgLabel"></div>
     </div>
+    <div style="padding:0 1rem" id="staffChores"></div>
   </div>
-</div>
 
-<!-- LOGIN SCREEN -->
-<div class="screen" id="screenLogin">
-  <div class="login-wrap">
-    <div class="login-logo">Advanced Implant Centers</div>
-    <div class="login-sub" id="loginDate">Select your name to view today's chores</div>
-    <div class="staff-grid" id="staffGrid"></div>
-    <button class="admin-btn" onclick="loginAs('admin')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Admin / Dr. Brian
-    </button>
-  </div>
-</div>
-
-<!-- STAFF SCREEN -->
-<div class="screen" id="screenStaff">
-  <div class="topbar">
-    <div>
-      <div class="topbar-title" id="staffName"></div>
-      <div class="topbar-sub" id="staffDate"></div>
+  <!-- ADMIN -->
+  <div class="screen" id="screenAdmin">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Admin overview <span class="sync-dot" id="syncDot"></span></div>
+        <div class="topbar-sub" id="adminDateSub"></div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="logout()">Sign out</button>
+      </div>
     </div>
-    <div class="topbar-right">
-      <div class="avatar" id="staffAvatar"></div>
-      <button class="icon-btn" onclick="logout()">Sign out</button>
+    <div style="padding:0.75rem 1rem">
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
+        <div class="date-nav-label" id="adminDateNav"></div>
+        <button class="date-nav-btn" onclick="changeDate(1)">›</button>
+      </div>
+      <div class="stats-row" id="adminStats"></div>
+      <button class="rotate-btn" onclick="rotateAssign()">↻ Rotate weekly assignments</button>
+      <div class="section-hdr">Staff status</div>
+      <div id="adminStaffRows"></div>
+      <div class="section-hdr" style="margin-top:1.5rem">All tasks</div>
+      <div id="adminAllTasks"></div>
     </div>
-  </div>
-  <div style="padding:1rem 1rem 0">
-    <div class="prog-bar-wrap"><div class="prog-bar" id="staffProg" style="width:0%"></div></div>
-    <div class="prog-label" id="staffProgLabel">0 of 0 tasks</div>
-  </div>
-  <div style="padding:0 1rem" id="staffChores"></div>
-</div>
-
-<!-- ADMIN SCREEN -->
-<div class="screen" id="screenAdmin">
-  <div class="topbar">
-    <div>
-      <div class="topbar-title">Admin overview</div>
-      <div class="topbar-sub" id="adminDate"></div>
-    </div>
-    <div class="topbar-right">
-      <button class="icon-btn" onclick="rotateAssign()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Rotate
-      </button>
-      <button class="icon-btn" onclick="logout()">Sign out</button>
-    </div>
-  </div>
-  <div style="padding:0.75rem 1rem">
-    <div class="date-nav">
-      <button class="date-nav-btn" onclick="changeDate(-1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="date-nav-label" id="adminDateNav"></div>
-      <button class="date-nav-btn" onclick="changeDate(1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-    <div class="stats-row" id="adminStats"></div>
-    <div class="section-hdr">Staff status</div>
-    <div id="adminStaffRows"></div>
-    <div class="section-hdr" style="margin-top:1.5rem">All tasks</div>
-    <div id="adminAllTasks"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG ─────────────────────────────────────────────────
-
+// ── CREDENTIALS ────────────────────────────────────────────
 const SB_URL = "https://fbdkneqzjfjsdflzcsvy.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZGtuZXF6amZqc2RmbHpjc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NzU2OTEsImV4cCI6MjA5NzM1MTY5MX0.FUFRlvxGnBUZbQrlmFXPR2x-U-LnxfPr9JE2pwzmryg";
-  
+const SB_KEY = "PASTE_ANON_KEY_HERE";
+
+// ── STAFF & CHORE CONFIG ───────────────────────────────────
 const STAFF = [
   {id:'osmani', name:'Osmani', pt:false, bg:'#EEEDFE', fg:'#3C3489', initials:'OS'},
   {id:'shawna', name:'Shawna', pt:false, bg:'#E1F5EE', fg:'#085041', initials:'SW'},
@@ -238,300 +161,222 @@ const OP_TASKS = [
   'Sweep & mop floors',
 ];
 const COMMON_TASKS = [
-  {id:'tk',  label:'Remove trash — kitchen',                    freq:'daily'},
-  {id:'tl',  label:'Remove trash — lobby & front area',         freq:'daily'},
-  {id:'tbs', label:'Remove trash — staff bathroom',             freq:'daily'},
-  {id:'tbp', label:'Remove trash — patient bathroom',           freq:'daily'},
-  {id:'sbs', label:'Restock soap & towels — staff bathroom',    freq:'daily'},
-  {id:'sbp', label:'Restock soap & towels — patient bathroom',  freq:'daily'},
-  {id:'ac',  label:'Flush & clean autoclave',                   freq:'weekly'},
+  {id:'tk',  label:'Remove trash — kitchen',               freq:'daily'},
+  {id:'tl',  label:'Remove trash — lobby & front area',    freq:'daily'},
+  {id:'tbs', label:'Remove trash — staff bathroom',        freq:'daily'},
+  {id:'tbp', label:'Remove trash — patient bathroom',      freq:'daily'},
+  {id:'sbs', label:'Restock soap & towels — staff bathroom',   freq:'daily'},
+  {id:'sbp', label:'Restock soap & towels — patient bathroom', freq:'daily'},
+  {id:'ac',  label:'Flush & clean autoclave',              freq:'weekly'},
 ];
 
 // ── STATE ──────────────────────────────────────────────────
-let supabase = null;
 let currentUser = null;
 let currentDate = todayStr();
-let rotOffset = parseInt(localStorage.getItem('aic_rot') || '0');
+let rotOffset = parseInt(localStorage.getItem('aic_rot')||'0');
 let checked = {};
-let realtimeSub = null;
+let pollTimer = null;
+
+// ── REST API ───────────────────────────────────────────────
+async function dbGet(date) {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/chore_checks?date=eq.${date}&done=eq.true`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    const result = {};
+    rows.forEach(r => { result[r.chore_id] = true; });
+    return result;
+  } catch(e) { return null; }
+}
+
+async function dbSet(date, choreId, done) {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/chore_checks`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ date, chore_id: choreId, done })
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// ── POLLING FOR SYNC ───────────────────────────────────────
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(async () => {
+    const fresh = await dbGet(currentDate);
+    if (fresh) {
+      checked = fresh;
+      refreshCurrentView();
+    }
+  }, 5000); // refresh every 5 seconds
+}
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
 
 // ── DATE UTILS ─────────────────────────────────────────────
-function todayStr() {
-  return new Date().toISOString().slice(0,10);
-}
+function todayStr() { return new Date().toISOString().slice(0,10); }
 function dateLabel(ds) {
-  const d = new Date(ds + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+  return new Date(ds+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 }
 function dateLabelShort(ds) {
-  const d = new Date(ds + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  return new Date(ds+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
-function dow(ds) { return new Date(ds + 'T00:00:00').getDay(); }
-function addDays(ds, n) {
-  const d = new Date(ds + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
+function dow(ds) { return new Date(ds+'T00:00:00').getDay(); }
+function addDays(ds,n) {
+  const d = new Date(ds+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
 }
 function weekNum(ds) {
-  const d = new Date(ds + 'T00:00:00');
-  const jan1 = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  const d = new Date(ds+'T00:00:00');
+  const jan1 = new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
 }
-function isJessicaDay(ds) {
-  const d = dow(ds);
-  return d === 1 || d === 3; // Mon or Wed
-}
+function isJessicaDay(ds) { const d=dow(ds); return d===1||d===3; }
 
 // ── ASSIGNMENT LOGIC ───────────────────────────────────────
-function availableStaff(ds) {
-  return STAFF.filter(s => s.id !== 'jessica' || isJessicaDay(ds));
+function availableStaff(ds) { return STAFF.filter(s=>s.id!=='jessica'||isJessicaDay(ds)); }
+function assignOps(ds,rot) {
+  const avail=availableStaff(ds);
+  const seed=(weekNum(ds)*7+dow(ds)+rot)%avail.length;
+  const pool=[...avail]; for(let i=0;i<seed;i++) pool.push(pool.shift());
+  const r={}; OPS.forEach((op,i)=>{r[op]=pool[i%pool.length].id;}); return r;
 }
-function assignOps(ds, rot) {
-  const avail = availableStaff(ds);
-  const seed = (weekNum(ds) * 7 + dow(ds) + rot) % avail.length;
-  const pool = [...avail];
-  for (let i = 0; i < seed; i++) pool.push(pool.shift());
-  const result = {};
-  OPS.forEach((op, i) => { result[op] = pool[i % pool.length].id; });
-  return result;
+function assignCommon(ds,rot) {
+  const avail=availableStaff(ds).filter(s=>!s.pt);
+  const seed=(weekNum(ds)*13+dow(ds)+rot+3)%avail.length;
+  const pool=[...avail]; for(let i=0;i<seed;i++) pool.push(pool.shift());
+  const r={}; COMMON_TASKS.forEach((t,i)=>{r[t.id]=pool[i%pool.length].id;}); return r;
 }
-function assignCommon(ds, rot) {
-  const avail = availableStaff(ds).filter(s => !s.pt);
-  const seed = (weekNum(ds) * 13 + dow(ds) + rot + 3) % avail.length;
-  const pool = [...avail];
-  for (let i = 0; i < seed; i++) pool.push(pool.shift());
-  const result = {};
-  COMMON_TASKS.forEach((t, i) => { result[t.id] = pool[i % pool.length].id; });
-  return result;
-}
-function allChoresForUser(uid, opA, comA) {
-  const items = [];
-  OPS.forEach(op => {
-    if (opA[op] === uid) {
-      OP_TASKS.forEach((t, i) => {
-        items.push({id:`op_${op}_${i}`, label:t, freq:'daily', section:op});
-      });
-    }
+function choresByUser(uid,opA,comA) {
+  const items=[];
+  OPS.forEach(op=>{
+    if(opA[op]===uid) OP_TASKS.forEach((t,i)=>items.push({id:`op_${op}_${i}`,label:t,freq:'daily',section:op}));
   });
-  COMMON_TASKS.forEach(t => {
-    if (comA[t.id] === uid) items.push({...t, section:'Common areas'});
-  });
+  COMMON_TASKS.forEach(t=>{ if(comA[t.id]===uid) items.push({...t,section:'Common areas'}); });
   return items;
 }
-function allChores(opA, comA) {
-  const items = [];
-  OPS.forEach(op => {
-    OP_TASKS.forEach((t, i) => {
-      items.push({id:`op_${op}_${i}`, label:t, freq:'daily', section:op, assignee:opA[op]});
-    });
-  });
-  COMMON_TASKS.forEach(t => {
-    items.push({...t, section:'Common areas', assignee:comA[t.id]});
-  });
+function allChores(opA,comA) {
+  const items=[];
+  OPS.forEach(op=>{ OP_TASKS.forEach((t,i)=>items.push({id:`op_${op}_${i}`,label:t,freq:'daily',section:op,assignee:opA[op]})); });
+  COMMON_TASKS.forEach(t=>items.push({...t,section:'Common areas',assignee:comA[t.id]}));
   return items;
 }
 
-// ── SUPABASE ───────────────────────────────────────────────
-async function initSupabase(url, key) {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-  document.head.appendChild(script);
-  await new Promise(r => script.onload = r);
-  supabase = window.supabase.createClient(url, key, {
-    auth: { persistSession: false }
-  });
-  return supabase;
-}
-
-function saveSupabaseConfig() {
-  const url = document.getElementById('sbUrl').value.trim();
-  const key = document.getElementById('sbKey').value.trim();
-  if (!url || !key) { showToast('Enter both URL and key'); return; }
-  localStorage.setItem('sb_url', url);
-  localStorage.setItem('sb_key', key);
-  initSupabase(url, key).then(() => {
-    showToast('Connected!');
-    goLogin();
-  }).catch(() => showToast('Connection failed — check credentials'));
-}
-
-function skipSetup() {
-  localStorage.setItem('sb_skip', '1');
-  goLogin();
-}
-
-async function loadCheckedFromDB(ds) {
-  if (!supabase) {
-    const raw = localStorage.getItem('aic_chk_' + ds);
-    return raw ? JSON.parse(raw) : {};
-  }
-  const { data } = await supabase
-    .from('chore_checks')
-    .select('chore_id, done')
-    .eq('date', ds);
-  const result = {};
-  if (data) data.forEach(r => { if (r.done) result[r.chore_id] = true; });
-  return result;
-}
-
-async function toggleCheckedDB(ds, choreId, currentVal) {
-  const newVal = !currentVal;
-  if (supabase) {
-    await supabase.from('chore_checks').upsert(
-      { date: ds, chore_id: choreId, done: newVal },
-      { onConflict: 'date,chore_id' }
-    );
-  } else {
-    const data = JSON.parse(localStorage.getItem('aic_chk_' + ds) || '{}');
-    if (newVal) data[choreId] = true; else delete data[choreId];
-    localStorage.setItem('aic_chk_' + ds, JSON.stringify(data));
-  }
-  if (newVal) checked[choreId] = true; else delete checked[choreId];
-}
-
-function subscribeRealtime(ds) {
-  if (!supabase) return;
-  if (realtimeSub) supabase.removeChannel(realtimeSub);
-  realtimeSub = supabase
-    .channel('chore_checks_' + ds)
-    .on('postgres_changes', {
-      event: '*', schema: 'public', table: 'chore_checks',
-      filter: `date=eq.${ds}`
-    }, payload => {
-      const r = payload.new || payload.old;
-      if (!r) return;
-      if (r.done) checked[r.chore_id] = true;
-      else delete checked[r.chore_id];
-      refreshCurrentView();
-    })
-    .subscribe();
-}
-
-// ── NAVIGATION ─────────────────────────────────────────────
+// ── NAV ────────────────────────────────────────────────────
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goLogin() {
-  showScreen('screenLogin');
-  renderLogin();
-}
 async function loginAs(id) {
-  currentUser = id;
-  currentDate = todayStr();
-  checked = await loadCheckedFromDB(currentDate);
-  subscribeRealtime(currentDate);
-  if (id === 'admin') { showScreen('screenAdmin'); renderAdmin(); }
-  else { showScreen('screenStaff'); renderStaff(); }
+  currentUser=id; currentDate=todayStr();
+  showToast('Loading...');
+  const fresh = await dbGet(currentDate);
+  checked = fresh || {};
+  if(id==='admin'){showScreen('screenAdmin');renderAdmin();}
+  else{showScreen('screenStaff');renderStaff();}
+  startPolling();
 }
-function logout() {
-  currentUser = null;
-  if (realtimeSub && supabase) supabase.removeChannel(realtimeSub);
-  goLogin();
-}
+function logout() { stopPolling(); currentUser=null; showScreen('screenLogin'); renderLogin(); }
 async function changeDate(n) {
-  currentDate = addDays(currentDate, n);
-  checked = await loadCheckedFromDB(currentDate);
-  subscribeRealtime(currentDate);
+  currentDate=addDays(currentDate,n);
+  const fresh=await dbGet(currentDate);
+  checked=fresh||{};
   renderAdmin();
 }
 function rotateAssign() {
-  rotOffset = (rotOffset + 1) % STAFF.length;
-  localStorage.setItem('aic_rot', rotOffset);
+  rotOffset=(rotOffset+1)%STAFF.length;
+  localStorage.setItem('aic_rot',rotOffset);
   showToast('Assignments rotated');
   renderAdmin();
 }
+async function tap(choreId) {
+  const was=!!checked[choreId];
+  if(!was) checked[choreId]=true; else delete checked[choreId];
+  refreshCurrentView();
+  const ok = await dbSet(currentDate, choreId, !was);
+  if(!ok) showToast('Sync error — check connection');
+}
+function refreshCurrentView() {
+  if(currentUser==='admin') renderAdmin();
+  else if(currentUser) renderStaff();
+}
 
-// ── RENDER: LOGIN ──────────────────────────────────────────
+// ── RENDER LOGIN ───────────────────────────────────────────
 function renderLogin() {
   document.getElementById('loginDate').textContent = dateLabel(todayStr());
-  const grid = document.getElementById('staffGrid');
-  grid.innerHTML = STAFF.map(s => {
-    const unavail = s.pt && !isJessicaDay(todayStr());
-    return `<button class="staff-btn${unavail ? ' unavail' : ''}" onclick="loginAs('${s.id}')">
+  document.getElementById('staffGrid').innerHTML = STAFF.map(s=>{
+    const unavail=s.pt&&!isJessicaDay(todayStr());
+    return `<button class="staff-btn${unavail?' unavail':''}" onclick="loginAs('${s.id}')">
       <div class="avatar avatar-lg" style="background:${s.bg};color:${s.fg};margin:0 auto">${s.initials}</div>
       <div class="staff-btn-name">${s.name}</div>
-      <div class="staff-btn-sub">${s.pt ? 'Part-time' : 'Full-time'}</div>
+      <div class="staff-btn-sub">${s.pt?'Part-time':'Full-time'}</div>
     </button>`;
   }).join('');
 }
 
-// ── RENDER: STAFF ──────────────────────────────────────────
+// ── RENDER STAFF ───────────────────────────────────────────
 function renderStaff() {
-  const opA = assignOps(currentDate, rotOffset);
-  const comA = assignCommon(currentDate, rotOffset);
-  const uid = currentUser;
-  const s = STAFF.find(x => x.id === uid);
-  const chores = allChoresForUser(uid, opA, comA);
-
-  document.getElementById('staffName').textContent = s.name;
-  document.getElementById('staffDate').textContent = dateLabel(todayStr());
-  const av = document.getElementById('staffAvatar');
-  av.textContent = s.initials;
-  av.style.background = s.bg;
-  av.style.color = s.fg;
-
-  const done = chores.filter(c => checked[c.id]).length;
-  const pct = chores.length ? Math.round(done / chores.length * 100) : 0;
-  document.getElementById('staffProg').style.width = pct + '%';
-  document.getElementById('staffProgLabel').textContent = `${done} of ${chores.length} tasks complete`;
-
-  const sections = {};
-  chores.forEach(c => {
-    if (!sections[c.section]) sections[c.section] = [];
-    sections[c.section].push(c);
-  });
-
-  let html = '';
-  if (chores.length === 0) {
-    html = `<div style="text-align:center;padding:3rem 0;color:var(--hint);font-size:14px">No tasks assigned today.</div>`;
+  const opA=assignOps(currentDate,rotOffset), comA=assignCommon(currentDate,rotOffset);
+  const s=STAFF.find(x=>x.id===currentUser);
+  const chores=choresByUser(currentUser,opA,comA);
+  document.getElementById('staffName').textContent=s.name;
+  document.getElementById('staffDate').textContent=dateLabel(todayStr());
+  const av=document.getElementById('staffAvatar');
+  av.textContent=s.initials; av.style.background=s.bg; av.style.color=s.fg;
+  const done=chores.filter(c=>checked[c.id]).length;
+  const pct=chores.length?Math.round(done/chores.length*100):0;
+  document.getElementById('staffProg').style.width=pct+'%';
+  document.getElementById('staffProgLabel').textContent=`${done} of ${chores.length} tasks complete`;
+  const sections={};
+  chores.forEach(c=>{ if(!sections[c.section])sections[c.section]=[]; sections[c.section].push(c); });
+  let html='';
+  if(!chores.length){
+    html=`<div style="text-align:center;padding:3rem 0;color:var(--hint);font-size:14px">No tasks assigned today.</div>`;
   } else {
-    Object.entries(sections).forEach(([sec, items]) => {
-      html += `<div class="section-hdr">${sec}</div>`;
-      items.forEach(c => {
-        const isDone = !!checked[c.id];
-        html += choreCardHTML(c, isDone, true);
-      });
+    Object.entries(sections).forEach(([sec,items])=>{
+      html+=`<div class="section-hdr">${sec}</div>`;
+      items.forEach(c=>{ html+=choreCard(c,!!checked[c.id],true); });
     });
   }
-  document.getElementById('staffChores').innerHTML = html;
+  document.getElementById('staffChores').innerHTML=html;
 }
 
-// ── RENDER: ADMIN ──────────────────────────────────────────
+// ── RENDER ADMIN ───────────────────────────────────────────
 function renderAdmin() {
-  const opA = assignOps(currentDate, rotOffset);
-  const comA = assignCommon(currentDate, rotOffset);
-  const all = allChores(opA, comA);
-
-  document.getElementById('adminDate').textContent = dateLabel(currentDate);
-  document.getElementById('adminDateNav').textContent = dateLabelShort(currentDate);
-
-  const totalDone = all.filter(t => checked[t.id]).length;
-  const pct = Math.round(totalDone / all.length * 100);
-  document.getElementById('adminStats').innerHTML = `
+  const opA=assignOps(currentDate,rotOffset), comA=assignCommon(currentDate,rotOffset);
+  const all=allChores(opA,comA);
+  document.getElementById('adminDateSub').textContent=dateLabel(currentDate);
+  document.getElementById('adminDateNav').textContent=dateLabelShort(currentDate);
+  const totalDone=all.filter(t=>checked[t.id]).length;
+  const pct=Math.round(totalDone/all.length*100);
+  document.getElementById('adminStats').innerHTML=`
     <div class="stat-card"><div class="stat-val">${totalDone}/${all.length}</div><div class="stat-lbl">Tasks complete</div></div>
     <div class="stat-card"><div class="stat-val">${pct}%</div><div class="stat-lbl">Overall progress</div></div>`;
-
-  let staffHTML = '';
-  STAFF.forEach(s => {
-    const unavail = s.pt && !isJessicaDay(currentDate);
-    if (unavail) {
-      staffHTML += `<div class="staff-row">
+  let staffHTML='';
+  STAFF.forEach(s=>{
+    if(s.pt&&!isJessicaDay(currentDate)){
+      staffHTML+=`<div class="staff-row">
         <div class="avatar" style="background:${s.bg};color:${s.fg}">${s.initials}</div>
         <div class="sr-info"><div class="sr-name">${s.name}</div><div class="sr-detail" style="color:var(--hint)">Not scheduled</div></div>
-      </div>`;
-      return;
+      </div>`; return;
     }
-    const mine = allChoresForUser(s.id, opA, comA);
-    const mdone = mine.filter(t => checked[t.id]).length;
-    const mpct = mine.length ? Math.round(mdone / mine.length * 100) : 0;
-    const myOps = [...new Set(OPS.filter(op => opA[op] === s.id))];
-    staffHTML += `<div class="staff-row">
+    const mine=choresByUser(s.id,opA,comA);
+    const mdone=mine.filter(t=>checked[t.id]).length;
+    const mpct=mine.length?Math.round(mdone/mine.length*100):0;
+    const myOps=[...new Set(OPS.filter(op=>opA[op]===s.id))];
+    staffHTML+=`<div class="staff-row">
       <div class="avatar" style="background:${s.bg};color:${s.fg}">${s.initials}</div>
       <div class="sr-info">
-        <div class="sr-name">${s.name}${s.pt ? ' <span style="font-size:10px;color:var(--hint)">(PT)</span>' : ''}</div>
-        <div class="sr-detail">${myOps.length ? myOps.join(', ') : 'Common areas'} · ${mdone}/${mine.length}</div>
+        <div class="sr-name">${s.name}${s.pt?' <span style="font-size:10px;color:var(--hint)">(PT)</span>':''}</div>
+        <div class="sr-detail">${myOps.length?myOps.join(', '):'Common areas'} · ${mdone}/${mine.length}</div>
       </div>
       <div class="sr-right">
         <div class="sr-pct">${mpct}%</div>
@@ -539,70 +384,37 @@ function renderAdmin() {
       </div>
     </div>`;
   });
-  document.getElementById('adminStaffRows').innerHTML = staffHTML;
-
-  const sections = {};
-  all.forEach(t => {
-    if (!sections[t.section]) sections[t.section] = [];
-    sections[t.section].push(t);
+  document.getElementById('adminStaffRows').innerHTML=staffHTML;
+  const sections={};
+  all.forEach(t=>{ if(!sections[t.section])sections[t.section]=[]; sections[t.section].push(t); });
+  let taskHTML='';
+  Object.entries(sections).forEach(([sec,items])=>{
+    taskHTML+=`<div class="section-hdr">${sec}</div>`;
+    items.forEach(c=>{ const as=STAFF.find(x=>x.id===c.assignee); taskHTML+=choreCard(c,!!checked[c.id],false,as); });
   });
-  let taskHTML = '';
-  Object.entries(sections).forEach(([sec, items]) => {
-    taskHTML += `<div class="section-hdr">${sec}</div>`;
-    items.forEach(c => {
-      const isDone = !!checked[c.id];
-      const as = STAFF.find(x => x.id === c.assignee);
-      taskHTML += choreCardHTML(c, isDone, false, as);
-    });
-  });
-  document.getElementById('adminAllTasks').innerHTML = taskHTML;
+  document.getElementById('adminAllTasks').innerHTML=taskHTML;
 }
 
 // ── CHORE CARD ─────────────────────────────────────────────
-function choreCardHTML(c, isDone, clickable, assignee) {
-  const pillClass = c.freq === 'weekly' ? 'pill pill-weekly' : 'pill pill-daily';
-  const assigneePill = assignee
-    ? `<span style="font-size:11px;padding:3px 8px;border-radius:99px;background:${assignee.bg};color:${assignee.fg};font-weight:500;flex-shrink:0">${assignee.name}</span>`
-    : '';
-  return `<div class="chore-card${isDone ? ' done' : ''}"${clickable ? ` onclick="tap('${c.id}')"` : ''}>
-    <div class="chk${isDone ? ' on' : ''}">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
+function choreCard(c,isDone,clickable,assignee) {
+  const ap=assignee?`<span style="font-size:11px;padding:3px 8px;border-radius:99px;background:${assignee.bg};color:${assignee.fg};font-weight:500;flex-shrink:0">${assignee.name}</span>`:'';
+  return `<div class="chore-card${isDone?' done':''}${clickable?'':' readonly'}"${clickable?` onclick="tap('${c.id}')"`:''}>
+    <div class="chk${isDone?' on':''}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <span class="chore-label">${c.label}</span>
-    <span class="${pillClass}">${c.freq}</span>
-    ${assigneePill}
+    <span class="pill pill-${c.freq}">${c.freq}</span>
+    ${ap}
   </div>`;
-}
-
-// ── TAP HANDLER ────────────────────────────────────────────
-async function tap(choreId) {
-  const was = !!checked[choreId];
-  await toggleCheckedDB(currentDate, choreId, was);
-  refreshCurrentView();
-}
-
-function refreshCurrentView() {
-  if (currentUser === 'admin') renderAdmin();
-  else if (currentUser) renderStaff();
 }
 
 // ── TOAST ──────────────────────────────────────────────────
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// ── OFFLINE DETECTION ──────────────────────────────────────
-window.addEventListener('online',  () => document.getElementById('offlineBanner').classList.remove('show'));
-window.addEventListener('offline', () => document.getElementById('offlineBanner').classList.add('show'));
-
 // ── INIT ───────────────────────────────────────────────────
-(async function init() {
-  try { await initSupabase(SB_URL, SB_KEY); } catch(e) { console.warn(e); }
-  goLogin();
-})();
+renderLogin();
 </script>
 </body>
 </html>

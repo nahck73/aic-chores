@@ -192,6 +192,7 @@ let rotOffset = parseInt(localStorage.getItem('aic_rot')||'0');
 let checked = {};
 let pollTimer = null;
 let pendingChores = new Map(); // choreId -> expected done state
+let syncTicket = 0;
 
 // ── REST API ───────────────────────────────────────────────
 async function dbGet(date) {
@@ -199,12 +200,15 @@ async function dbGet(date) {
     const res = await fetch(`${SB_URL}/rest/v1/chore_checks?date=eq.${date}&done=eq.true`, {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error('dbGet error:', res.status, await res.text());
+      return null;
+    }
     const rows = await res.json();
     const result = {};
     rows.forEach(r => { result[r.chore_id] = true; });
     return result;
-  } catch(e) { return null; }
+  } catch(e) { console.error('dbGet fetch error:', e); return null; }
 }
 
 async function dbSet(date, choreId, done) {
@@ -238,34 +242,52 @@ function mergePollState(fresh) {
   Object.keys(fresh).forEach(k => { if (!pendingChores.has(k)) checked[k] = true; });
   Object.keys(checked).forEach(k => { if (!fresh[k] && !pendingChores.has(k)) delete checked[k]; });
 }
+function setSyncStatus(ok, syncing) {
+  const dot = document.getElementById('syncDot');
+  if (!dot) return;
+  dot.classList.toggle('syncing', !!syncing);
+  if (!syncing) dot.style.background = ok ? 'var(--green)' : '#E24B4A';
+}
+async function pullSync() {
+  if (!currentUser) return;
+  const ticket = syncTicket;
+  if (currentUser !== 'admin') currentDate = todayStr();
+  const fresh = await dbGet(currentDate);
+  if (ticket !== syncTicket) return;
+  if (fresh === null) { setSyncStatus(false, false); return; }
+  mergePollState(fresh);
+  refreshCurrentView();
+  setSyncStatus(true, false);
+}
 function startPolling() {
   stopPolling();
-  pollTimer = setInterval(async () => {
-    const fresh = await dbGet(currentDate);
-    if (fresh !== null) {
-      mergePollState(fresh);
-      refreshCurrentView();
-    }
-  }, 5000);
+  pullSync();
+  pollTimer = setInterval(pullSync, 3000);
 }
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
 }
 
 // ── DATE UTILS ─────────────────────────────────────────────
-function todayStr() { return new Date().toISOString().slice(0,10); }
+function fmtDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function todayStr() { return fmtDate(new Date()); }
 function dateLabel(ds) {
-  return new Date(ds+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  return new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 }
 function dateLabelShort(ds) {
-  return new Date(ds+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  return new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
-function dow(ds) { return new Date(ds+'T00:00:00').getDay(); }
+function dow(ds) { return new Date(ds+'T12:00:00').getDay(); }
 function addDays(ds,n) {
-  const d = new Date(ds+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+  const d = new Date(ds+'T12:00:00'); d.setDate(d.getDate()+n); return fmtDate(d);
 }
 function weekNum(ds) {
-  const d = new Date(ds+'T00:00:00');
+  const d = new Date(ds+'T12:00:00');
   const jan1 = new Date(d.getFullYear(),0,1);
   return Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
 }
@@ -319,6 +341,7 @@ function logout() { stopPolling(); pendingChores.clear(); currentUser=null; show
 async function changeDate(n) {
   currentDate=addDays(currentDate,n);
   pendingChores.clear();
+  syncTicket++;
   const fresh=await dbGet(currentDate);
   checked=fresh||{};
   renderAdmin();
@@ -332,16 +355,22 @@ function rotateAssign() {
 async function tap(choreId) {
   const was = !!checked[choreId];
   const newDone = !was;
+  syncTicket++;
+  setSyncStatus(true, true);
   if (newDone) checked[choreId] = true; else delete checked[choreId];
   pendingChores.set(choreId, newDone);
   refreshCurrentView();
   const ok = await dbSet(currentDate, choreId, newDone);
+  syncTicket++;
   if (!ok) {
     pendingChores.delete(choreId);
     if (!was) delete checked[choreId]; else checked[choreId] = true;
     refreshCurrentView();
+    setSyncStatus(false, false);
     showToast('Sync error — check connection');
+    return;
   }
+  await pullSync();
 }
 function refreshCurrentView() {
   if(currentUser==='admin') renderAdmin();
@@ -390,7 +419,7 @@ function renderStaff() {
   const s=STAFF.find(x=>x.id===currentUser);
   const chores=choresByUser(currentUser,opA,comA);
   document.getElementById('staffName').textContent=s.name;
-  document.getElementById('staffDate').textContent=dateLabel(todayStr());
+  document.getElementById('staffDate').textContent=dateLabel(currentDate);
   const av=document.getElementById('staffAvatar');
   av.textContent=s.initials; av.style.background=s.bg; av.style.color=s.fg;
   const done=chores.filter(c=>checked[c.id]).length;
@@ -460,7 +489,7 @@ function renderAdmin() {
 // ── CHORE CARD ─────────────────────────────────────────────
 function choreCard(c,isDone,clickable,assignee) {
   const ap=assignee?`<span style="font-size:11px;padding:3px 8px;border-radius:99px;background:${assignee.bg};color:${assignee.fg};font-weight:500;flex-shrink:0">${assignee.name}</span>`:'';
-  return `<div class="chore-card${isDone?' done':''}${clickable?'':' readonly'}"${clickable?` onclick="tap('${c.id}')"`:''}>
+  return `<div class="chore-card${isDone?' done':''}${clickable?'':' readonly'}"${clickable?` onclick='tap(${JSON.stringify(c.id)})'`:''}>
     <div class="chk${isDone?' on':''}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <span class="chore-label">${c.label}</span>
     <span class="pill pill-${c.freq}">${c.freq}</span>

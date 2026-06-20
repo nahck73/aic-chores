@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supabase REST Test</title>
+<style>
+  body { font-family: sans-serif; padding: 2rem; max-width: 500px; margin: 0 auto; }
+  .box { padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 14px; word-break: break-all; }
+  .info { background: #e8f4ff; color: #0c4a6e; }
+  .ok { background: #dcfce7; color: #14532d; }
+  .err { background: #fee2e2; color: #7f1d1d; }
+  button { background: #1D9E75; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<h2>Supabase REST Test</h2>
+<div id="log"></div>
+<button onclick="runTest()">Run Test</button>
+
+<script>
+const SB_URL = "https://fbdkneqzjfjsdffzcsvy.supabase.co";
+const SB_KEY = "PASTE_ANON_KEY_HERE";
+
+function log(msg, type) {
+  document.getElementById('log').innerHTML += `<div class="box ${type}">${msg}</div>`;
+}
+
+async function runTest() {
+  document.getElementById('log').innerHTML = '';
+  log('Testing direct REST API call...', 'info');
+
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/chore_checks?date=eq.2099-01-01`, {
+      method: 'GET',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    log('HTTP status: ' + res.status, res.ok ? 'ok' : 'err');
+    const text = await res.text();
+    log('Response: ' + text, res.ok ? 'ok' : 'err');
+
+    if (res.ok) {
+      log('✓ Connection works! Now testing write...', 'ok');
+      const res2 = await fetch(`${SB_URL}/rest/v1/chore_checks`, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ date: '2099-01-01', chore_id: 'test', done: true })
+      });
+      log('Write status: ' + res2.status, res2.ok ? 'ok' : 'err');
+      const text2 = await res2.text();
+      log('Write response: ' + (text2 || '(empty = success)'), res2.ok ? 'ok' : 'err');
+      if (res2.ok) log('🎉 Everything works!', 'ok');
+    }
+  } catch(e) {
+    log('✗ Fetch error: ' + e.message, 'err');
+    log('This usually means a network or CORS block.', 'err');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supabase Connection Test</title>
+<style>
+  body { font-family: sans-serif; padding: 2rem; max-width: 500px; margin: 0 auto; }
+  .box { padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 14px; }
+  .info { background: #e8f4ff; color: #0c4a6e; }
+  .ok { background: #dcfce7; color: #14532d; }
+  .err { background: #fee2e2; color: #7f1d1d; word-break: break-all; }
+  button { background: #1D9E75; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<h2>Supabase Connection Test</h2>
+<div id="log"></div>
+<button onclick="runTest()">Run Test</button>
+
+<script>
+const SB_URL = "https://fbdkneqzjfjsdffzcsvy.supabase.co";
+const SB_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+
+function log(msg, type) {
+  document.getElementById('log').innerHTML += `<div class="box ${type}">${msg}</div>`;
+}
+
+async function runTest() {
+  document.getElementById('log').innerHTML = '';
+  log('Loading Supabase library...', 'info');
+  
+  try {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Failed to load Supabase library'));
+      document.head.appendChild(s);
+    });
+    log('✓ Library loaded', 'ok');
+  } catch(e) {
+    log('✗ Library load failed: ' + e.message, 'err');
+    return;
+  }
+
+  log('Connecting to Supabase...', 'info');
+  let db;
+  try {
+    db = window.supabase.createClient(SB_URL, SB_KEY);
+    log('✓ Client created', 'ok');
+  } catch(e) {
+    log('✗ Client creation failed: ' + e.message, 'err');
+    return;
+  }
+
+  log('Testing database write...', 'info');
+  try {
+    const { data, error } = await db
+      .from('chore_checks')
+      .upsert({ date: '2099-01-01', chore_id: 'test', done: true }, { onConflict: 'date,chore_id' })
+      .select();
+    if (error) throw error;
+    log('✓ Write successful! Row saved to database.', 'ok');
+  } catch(e) {
+    log('✗ Write failed: ' + e.message + ' | Code: ' + (e.code||'?') + ' | Details: ' + (e.details||'none'), 'err');
+    return;
+  }
+
+  log('Testing database read...', 'info');
+  try {
+    const { data, error } = await db
+      .from('chore_checks')
+      .select('*')
+      .eq('date', '2099-01-01');
+    if (error) throw error;
+    log('✓ Read successful! Found ' + data.length + ' row(s).', 'ok');
+    log('🎉 Everything works! Your main app should work now.', 'ok');
+  } catch(e) {
+    log('✗ Read failed: ' + e.message, 'err');
+  }
+}
+</script>
+</body>
+</html>

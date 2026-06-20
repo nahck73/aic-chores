@@ -191,7 +191,7 @@ let currentDate = todayStr();
 let rotOffset = parseInt(localStorage.getItem('aic_rot')||'0');
 let checked = {};
 let pollTimer = null;
-let pendingChores = new Set();
+let pendingChores = new Map(); // choreId -> expected done state
 
 // ── REST API ───────────────────────────────────────────────
 async function dbGet(date) {
@@ -248,14 +248,19 @@ async function dbSet(date, choreId, done) {
 }
 
 // ── POLLING FOR SYNC ───────────────────────────────────────
+function mergePollState(fresh) {
+  for (const [choreId, expected] of pendingChores) {
+    if (!!fresh[choreId] === expected) pendingChores.delete(choreId);
+  }
+  Object.keys(fresh).forEach(k => { if (!pendingChores.has(k)) checked[k] = true; });
+  Object.keys(checked).forEach(k => { if (!fresh[k] && !pendingChores.has(k)) delete checked[k]; });
+}
 function startPolling() {
   stopPolling();
   pollTimer = setInterval(async () => {
     const fresh = await dbGet(currentDate);
     if (fresh !== null) {
-      // Merge: don't overwrite chores with in-flight local changes
-      Object.keys(fresh).forEach(k => { if (!pendingChores.has(k)) checked[k] = true; });
-      Object.keys(checked).forEach(k => { if (!fresh[k] && !pendingChores.has(k)) delete checked[k]; });
+      mergePollState(fresh);
       refreshCurrentView();
     }
   }, 5000);
@@ -319,6 +324,7 @@ function showScreen(id) {
 }
 async function loginAs(id) {
   currentUser=id; currentDate=todayStr();
+  pendingChores.clear();
   showToast('Loading...');
   const fresh = await dbGet(currentDate);
   checked = fresh || {};
@@ -326,9 +332,10 @@ async function loginAs(id) {
   else{showScreen('screenStaff');renderStaff();}
   startPolling();
 }
-function logout() { stopPolling(); currentUser=null; showScreen('screenLogin'); renderLogin(); }
+function logout() { stopPolling(); pendingChores.clear(); currentUser=null; showScreen('screenLogin'); renderLogin(); }
 async function changeDate(n) {
   currentDate=addDays(currentDate,n);
+  pendingChores.clear();
   const fresh=await dbGet(currentDate);
   checked=fresh||{};
   renderAdmin();
@@ -341,12 +348,13 @@ function rotateAssign() {
 }
 async function tap(choreId) {
   const was = !!checked[choreId];
-  if (!was) checked[choreId] = true; else delete checked[choreId];
-  pendingChores.add(choreId);
+  const newDone = !was;
+  if (newDone) checked[choreId] = true; else delete checked[choreId];
+  pendingChores.set(choreId, newDone);
   refreshCurrentView();
-  const ok = await dbSet(currentDate, choreId, !was);
-  pendingChores.delete(choreId);
+  const ok = await dbSet(currentDate, choreId, newDone);
   if (!ok) {
+    pendingChores.delete(choreId);
     if (!was) delete checked[choreId]; else checked[choreId] = true;
     refreshCurrentView();
     showToast('Sync error — check connection');

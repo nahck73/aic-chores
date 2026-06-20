@@ -338,7 +338,9 @@ async function initSupabase(url, key) {
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
   document.head.appendChild(script);
   await new Promise(r => script.onload = r);
-  supabase = window.supabase.createClient(url, key);
+  supabase = window.supabase.createClient(url, key, {
+    auth: { persistSession: false }
+  });
   return supabase;
 }
 

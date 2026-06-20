@@ -85,10 +85,24 @@
       <div class="login-logo">Advanced Implant Centers</div>
       <div class="login-sub" id="loginDate"></div>
       <div class="staff-grid" id="staffGrid"></div>
-      <button class="admin-btn" onclick="loginAs('admin')">
+      <button class="admin-btn" onclick="showAdminLogin()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Admin / Dr. Brian
       </button>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSWORD MODAL -->
+  <div id="adminModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:320px">
+      <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">Admin login</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1rem">Enter the admin password to continue</div>
+      <input id="adminPwInput" type="password" placeholder="Password"
+        style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:15px;background:var(--bg);color:var(--text);margin-bottom:8px"
+        onkeydown="if(event.key==='Enter')checkAdminPw()">
+      <div id="adminPwError" style="font-size:12px;color:#E24B4A;margin-bottom:8px;display:none">Incorrect password — try again</div>
+      <button onclick="checkAdminPw()" style="width:100%;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);padding:11px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px">Enter</button>
+      <button onclick="closeAdminModal()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:14px;cursor:pointer;color:var(--muted)">Cancel</button>
     </div>
   </div>
 
@@ -143,7 +157,8 @@
 <script>
 // ── CREDENTIALS ────────────────────────────────────────────
 const SB_URL = "https://fbdkneqzjfjsdflzcsvy.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZGtuZXF6amZqc2RmbHpjc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NzU2OTEsImV4cCI6MjA5NzM1MTY5MX0.FUFRlvxGnBUZbQrlmFXPR2x-U-LnxfPr9JE2pwzmryg";
+const SB_KEY = "PASTE_ANON_KEY_HERE";
+const ADMIN_PASSWORD = "AIC2024";
 
 // ── STAFF & CHORE CONFIG ───────────────────────────────────
 const STAFF = [
@@ -199,12 +214,16 @@ async function dbSet(date, choreId, done) {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + SB_KEY,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'return=minimal,resolution=merge-duplicates'
       },
       body: JSON.stringify({ date, chore_id: choreId, done })
     });
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('dbSet error:', res.status, txt);
+    }
     return res.ok;
-  } catch(e) { return false; }
+  } catch(e) { console.error('dbSet fetch error:', e); return false; }
 }
 
 // ── POLLING FOR SYNC ───────────────────────────────────────
@@ -307,6 +326,29 @@ async function tap(choreId) {
 function refreshCurrentView() {
   if(currentUser==='admin') renderAdmin();
   else if(currentUser) renderStaff();
+}
+
+// ── ADMIN PASSWORD ─────────────────────────────────────────
+function showAdminLogin() {
+  const modal = document.getElementById('adminModal');
+  modal.style.display = 'flex';
+  document.getElementById('adminPwInput').value = '';
+  document.getElementById('adminPwError').style.display = 'none';
+  setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+}
+function checkAdminPw() {
+  const val = document.getElementById('adminPwInput').value;
+  if (val === ADMIN_PASSWORD) {
+    closeAdminModal();
+    loginAs('admin');
+  } else {
+    document.getElementById('adminPwError').style.display = 'block';
+    document.getElementById('adminPwInput').value = '';
+    document.getElementById('adminPwInput').focus();
+  }
 }
 
 // ── RENDER LOGIN ───────────────────────────────────────────

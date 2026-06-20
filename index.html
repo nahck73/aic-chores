@@ -193,6 +193,7 @@ let checked = {};
 let pollTimer = null;
 let pendingChores = new Map(); // choreId -> expected done state
 let syncTicket = 0;
+let isSaving = false;
 
 // ── REST API ───────────────────────────────────────────────
 async function dbGet(date) {
@@ -262,7 +263,7 @@ async function pullSync() {
 function startPolling() {
   stopPolling();
   pullSync();
-  pollTimer = setInterval(pullSync, 3000);
+  pollTimer = setInterval(() => { if (!isSaving) pullSync(); }, 3000);
 }
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
@@ -355,22 +356,27 @@ function rotateAssign() {
 async function tap(choreId) {
   const was = !!checked[choreId];
   const newDone = !was;
-  syncTicket++;
-  setSyncStatus(true, true);
-  if (newDone) checked[choreId] = true; else delete checked[choreId];
-  pendingChores.set(choreId, newDone);
-  refreshCurrentView();
-  const ok = await dbSet(currentDate, choreId, newDone);
-  syncTicket++;
-  if (!ok) {
-    pendingChores.delete(choreId);
-    if (!was) delete checked[choreId]; else checked[choreId] = true;
+  isSaving = true;
+  try {
+    syncTicket++;
+    setSyncStatus(true, true);
+    if (newDone) checked[choreId] = true; else delete checked[choreId];
+    pendingChores.set(choreId, newDone);
     refreshCurrentView();
-    setSyncStatus(false, false);
-    showToast('Sync error — check connection');
-    return;
+    const ok = await dbSet(currentDate, choreId, newDone);
+    syncTicket++;
+    if (!ok) {
+      pendingChores.delete(choreId);
+      if (!was) delete checked[choreId]; else checked[choreId] = true;
+      refreshCurrentView();
+      setSyncStatus(false, false);
+      showToast('Sync error — check connection');
+      return;
+    }
+    await pullSync();
+  } finally {
+    isSaving = false;
   }
-  await pullSync();
 }
 function refreshCurrentView() {
   if(currentUser==='admin') renderAdmin();

@@ -191,6 +191,7 @@ let currentDate = todayStr();
 let rotOffset = parseInt(localStorage.getItem('aic_rot')||'0');
 let checked = {};
 let pollTimer = null;
+let pendingChores = new Set();
 
 // ── REST API ───────────────────────────────────────────────
 async function dbGet(date) {
@@ -251,11 +252,13 @@ function startPolling() {
   stopPolling();
   pollTimer = setInterval(async () => {
     const fresh = await dbGet(currentDate);
-    if (fresh) {
-      checked = fresh;
+    if (fresh !== null) {
+      // Merge: don't overwrite chores with in-flight local changes
+      Object.keys(fresh).forEach(k => { if (!pendingChores.has(k)) checked[k] = true; });
+      Object.keys(checked).forEach(k => { if (!fresh[k] && !pendingChores.has(k)) delete checked[k]; });
       refreshCurrentView();
     }
-  }, 5000); // refresh every 5 seconds
+  }, 5000);
 }
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
@@ -337,11 +340,17 @@ function rotateAssign() {
   renderAdmin();
 }
 async function tap(choreId) {
-  const was=!!checked[choreId];
-  if(!was) checked[choreId]=true; else delete checked[choreId];
+  const was = !!checked[choreId];
+  if (!was) checked[choreId] = true; else delete checked[choreId];
+  pendingChores.add(choreId);
   refreshCurrentView();
   const ok = await dbSet(currentDate, choreId, !was);
-  if(!ok) showToast('Sync error — check connection');
+  pendingChores.delete(choreId);
+  if (!ok) {
+    if (!was) delete checked[choreId]; else checked[choreId] = true;
+    refreshCurrentView();
+    showToast('Sync error — check connection');
+  }
 }
 function refreshCurrentView() {
   if(currentUser==='admin') renderAdmin();
